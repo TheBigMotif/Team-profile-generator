@@ -4,7 +4,6 @@ const fs = require("fs");
 const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
-const express = require("express");
 
 // GIVEN a command-line application that accepts user input
 // WHEN I am prompted for my team members and their information
@@ -91,9 +90,8 @@ const internQuestions = [
     message: "What is the interns school name",
   },
 ];
-let manager = [];
-let intern = [];
-let engineer = [];
+
+let users = [];
 
 function promptIntern() {
   inquirer.prompt(internQuestions).then((answers) => {
@@ -104,8 +102,9 @@ function promptIntern() {
       answers.email,
       answers.school
     );
-
+    users.push(intern);
     console.log(intern);
+    console.log(users);
 
     fs.writeFileSync("team.html", htmlData());
     menu();
@@ -120,8 +119,9 @@ function promptEngineer() {
       answers.email,
       answers.github
     );
-
+    users.push(engineer);
     console.log(engineer);
+    console.log(users);
 
     fs.writeFileSync("team.html", htmlData());
 
@@ -137,6 +137,7 @@ function promptManager() {
       answers.email,
       answers.office
     );
+    users.push(manager);
 
     console.log(manager);
 
@@ -170,6 +171,10 @@ async function menu() {
     //FOR NOW, I'LL JUST CONSOLE LOG IT LOL
     console.log(engineer.name, manager, intern);
     //CONSOLE LOG NOT WORKING HMS
+
+    // crear servidor local
+    // crear app express
+    menu();
   }
 
   if (answer.options === "Add an engineer") {
@@ -195,48 +200,53 @@ function htmlData() {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <title>Team Roster</title>
   </head>
   <body>
-    <h1>Team Roster</h1>
-    <ul>
-      <li>
-        Manager: ${manager.name}
-        <ul>
-          <li>ID: ${manager.id}</li>
-          <li>Email: <a href="mailto:${manager.email}">${manager.email}</a></li>
-          <li>Office Number: ${manager.office}</li>
-        </ul>
-      </li>`;
+  <div class="p-5 text-center bg-light">
+    <h1 class="mb-3">TEAM ROSTER</h1>
+    <h4 class="mb-3">Welcome to your team</h4>
+  </div>
 
-  if (engineer) {
+    <div class="container text-center">
+    <div class="row align-items-start">
+   `;
+  // console.log("html", users);
+  users.map((user) => {
     html += `
-      <li>
-        Engineer: ${engineer.name}
-        <ul>
-          <li>ID: ${engineer.id}</li>
-          <li>Email: <a href="mailto:${engineer.email}">${engineer.email}</a></li>
-          <li>GitHub: <a href="https://github.com/${engineer.github}" target="_blank">${engineer.github}</a></li>
-        </ul>
-      </li>`;
-  }
 
-  if (intern) {
+   
+    <div class="col">
+    <div class="card" style="width: 18rem;">
+    <div class="card-body">
+    <h5 class="card-title"> ${user.role}: ${user.name}</h5>
+    <p class="card-text">ID: ${user.id}</p>
+    <p class="card-text">Email: <a href="mailto:${user.email}">${user.email}</a></p>
+    `;
+    if (user.github) {
+      html += `<p class="card-text">GitHub: <a href="https://github.com/${user.github}" target="_blank">${user.github}</a></p>`;
+    }
+    if (user.school) {
+      html += `<p class="card-text">School: ${user.school}</p>`;
+    }
+    if (user.office) {
+      html += `<p class="card-text">Office: ${user.office}</p>`;
+    }
     html += `
-      <li>
-        Intern: ${intern.name}
-        <ul>
-          <li>ID: ${intern.id}</li>
-          <li>Email: <a href="mailto:${intern.email}">${intern.email}</a></li>
-          <li>School: ${intern.school}</li>
-        </ul>
-      </li>`;
-  }
+    <a href="mailto:${user.email}" class="btn btn-primary">Send me an email!</a>
+    </div>
+    </div>
+    </div>
 
+         
+      
+        `;
+  });
   html += `
-    </ul>
+  </div>
+  </div>
   </body>
   </html>`;
-
   return html;
 }
